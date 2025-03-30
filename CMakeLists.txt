@@ -15,6 +15,6 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(main src/main.cpp "src/Player.h" "src/Player.cpp")
+add_executable(main src/main.cpp "src/Player.h" "src/Player.cpp" "src/Objet.cpp" "src/Objet.h")
 target_compile_features(main PRIVATE cxx_std_20)
 target_link_libraries(main PRIVATE SFML::Graphics SFML::Audio SFML::Window SFML::Network)

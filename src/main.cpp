@@ -1,14 +1,16 @@
 #include <SFML/Graphics.hpp>
 #include "Player.h"
-
+#include "Objet.h"
 #include <optional>
 
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({800,400}), "Snake Game !");
-    
+ 
     Player snake;
-    snake.center_player(window);
+    Objet apple;
+    snake.center_player_on_screen(window);
+    apple.generate_random_position(window);
     
 
     sf::Clock clock;
@@ -21,8 +23,10 @@ int main()
                 window.close();
         }
         snake.move_player(deltatime);
+        snake.wrap_around_screen(window);
         window.clear();
-        snake.draw(window);
+        snake.render_player(window);
+        apple.draw(window);
         window.display();
     }
 }
