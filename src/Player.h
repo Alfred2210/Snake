@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Objet.h"
 
 class Player
 {
@@ -15,7 +16,7 @@ public:
 	void wrap_around_screen(sf::RenderWindow& window);
 	float get_position_x();
 	float get_position_y();
-	void check_collision_aabb();
+	void check_collision_aabb(Objet & apple, sf::RenderWindow& window);
 private:
 	std::list< std::unique_ptr<sf::Sprite>> m_sprites_snake;
 	std::vector<std::unique_ptr<sf::Texture>> m_snake_textures;

@@ -40,3 +40,20 @@ void Objet::generate_random_position(sf::RenderWindow& window)
    
 }
 
+void Objet::bound_red(sf::RenderWindow& window)  
+{  
+   sf::FloatRect boundingBox = m_apple_sprite->getGlobalBounds();  
+   sf::RectangleShape rectangle(sf::Vector2f(boundingBox.size.x, boundingBox.size.y));  
+   rectangle.setPosition(m_apple_sprite->getPosition());
+   rectangle.setOutlineThickness(2.f); // Épaisseur de la bordure  
+   rectangle.setOutlineColor(sf::Color::Red);  
+   rectangle.setFillColor(sf::Color::Transparent); // Rendre l'intérieur transparent  
+
+   window.draw(rectangle);  
+}
+
+std::unique_ptr<sf::Sprite> Objet::get_sprite()
+{
+    return std::make_unique<sf::Sprite>(*m_apple_sprite);
+}
+

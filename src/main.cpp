@@ -11,6 +11,8 @@ int main()
     Objet apple;
     snake.center_player_on_screen(window);
     apple.generate_random_position(window);
+   
+   
     
 
     sf::Clock clock;
@@ -27,6 +29,8 @@ int main()
         window.clear();
         snake.render_player(window);
         apple.draw(window);
+        //apple.bound_red(window);
+        snake.check_collision_aabb(apple,window);
         window.display();
     }
 }

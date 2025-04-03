@@ -152,8 +152,18 @@ float Player::get_position_y()
 	return m_y;
 }
 
-void Player::check_collision_aabb()
+void Player::check_collision_aabb(Objet& apple, sf::RenderWindow& window)
 {
+
+	sf::FloatRect bounding_box_snake = m_sprites_snake.begin()->get()->getGlobalBounds();
+	sf::FloatRect boundingBox_box_apple = apple.get_sprite()->getGlobalBounds();
+	
+
+	if (bounding_box_snake.findIntersection(boundingBox_box_apple))
+	{
+		apple.generate_random_position(window);
+	}
+
 }
 
 
