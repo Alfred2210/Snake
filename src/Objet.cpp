@@ -52,7 +52,7 @@ void Objet::bound_red(sf::RenderWindow& window)
    window.draw(rectangle);  
 }
 
-std::unique_ptr<sf::Sprite> Objet::get_sprite()
+std::unique_ptr<sf::Sprite> Objet::get_apple_sprite()
 {
     return std::make_unique<sf::Sprite>(*m_apple_sprite);
 }

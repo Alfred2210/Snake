@@ -24,13 +24,13 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
         }
-        snake.move_player(deltatime);
+        snake.update_snake_movement(deltatime);
         snake.wrap_around_screen(window);
         window.clear();
         snake.render_player(window);
         apple.draw(window);
         //apple.bound_red(window);
-        snake.check_collision_aabb(apple,window);
+        snake.check_collision_with_apple(apple,window);
         window.display();
     }
 }

@@ -7,6 +7,8 @@ Player::Player()
 {
 
 	add_texture_to_snake("../../../../assets/head_left.png", 0);
+	add_texture_to_snake("../../../../assets/tail_right.png", 1);
+	//add_texture_to_snake("../../../../assets/body_horizontal.png", 2);
 
 
 }
@@ -21,7 +23,7 @@ void Player::add_texture_to_snake(const std::filesystem::path& filename, int ind
 
 	if (!m_snake_textures.back()->loadFromFile(filename))
 	{
-		// Handle the error, for example, by throwing an exception
+		
 		m_snake_textures.pop_back();
 		throw std::runtime_error("Failed to load texture from file: ");
 	}
@@ -41,17 +43,28 @@ void Player::render_player(sf::RenderWindow& window)
 void Player::center_player_on_screen(sf::RenderWindow& window)
 {
 	sf::Vector2u windows_size = window.getSize();
+	float x = (windows_size.x - m_sprites_snake.begin()->get()->getLocalBounds().size.x) / 2.0f;
+	float y = (windows_size.y - m_sprites_snake.begin()->get()->getLocalBounds().size.y) / 2.0f;
+	m_sprites_snake.begin()->get()->setPosition(sf::Vector2f(x, y));
+
+	float sprite_width = m_sprites_snake.front()->getLocalBounds().size.x;
+	float sprite_height = m_sprites_snake.front()->getLocalBounds().size.y;
+	
+	float temp_x = x;
+	float temp_y = y;
+
 	for (auto& sprite : m_sprites_snake)
 	{
-		float x = (windows_size.x - sprite->getGlobalBounds().size.x) / 2.00f;
-		float y = (windows_size.y - sprite->getGlobalBounds().size.y) / 2.00f;
-		sprite->setPosition(sf::Vector2f(x, y));
-		m_x = x;
-		m_y = y;
+		sprite->setPosition(sf::Vector2f(temp_x, temp_y));
+		temp_x += sprite_width; 
 	}
+	m_x = x;
+	m_y = y;
+
+
 }
 
-void Player::user_input()
+void Player::handle_user_input()
 {
 	bool ismoving = false;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
@@ -83,21 +96,37 @@ void Player::user_input()
 	}
 }
 
-void Player::move_player(float& deltatime)
+void Player::update_snake_movement(float& deltatime)
 {
-	user_input();
+	handle_user_input();
 
-	m_x = m_x + m_vx * deltatime;
-	m_y = m_y + m_vy * deltatime;
+	float newposition_x = m_x + m_vx * deltatime; 
+	float newposition_y = m_y + m_vy * deltatime;
 
-	//float offset = 0.0f;
-	for (auto& sprite : m_sprites_snake)
-	{
-		//auto sprite_size = sprite->getTexture().getSize();
-		sprite->setPosition({ m_x,m_y });
-		//offset = sprite_size.x;
-	}
+	auto temp = m_sprites_snake.front()->getPosition();
+	m_sprites_snake.front()->setPosition({ newposition_x, newposition_y });
 	
+	float sprite_width = m_sprites_snake.front()->getLocalBounds().size.x;
+	float sprite_height = m_sprites_snake.front()->getLocalBounds().size.y;
+
+
+	for (auto it = std::next(m_sprites_snake.begin()); it!=m_sprites_snake.end();it++)
+	{
+		auto current_pos = (*it)->getPosition();
+		if (m_vx > 0)
+			(*it)->setPosition(sf::Vector2f(temp.x - sprite_width, temp.y));
+		else if(m_vx<0)
+			(*it)->setPosition(sf::Vector2f(temp.x + sprite_width, temp.y));
+		else if (m_vy > 0)
+			(*it)->setPosition(sf::Vector2f(temp.x , temp.y - sprite_height));
+		else if (m_vy < 0)
+			(*it)->setPosition(sf::Vector2f(temp.x , temp.y + sprite_height));
+
+		temp = current_pos;
+	}
+
+	m_x = newposition_x;
+	m_y = newposition_y;
 }
 
 void Player::set_speed(float vx, float vy)
@@ -117,14 +146,14 @@ void Player::wrap_around_screen(sf::RenderWindow& window)
 
 	if (m_sprites_snake.begin()->get()->getPosition().x > windows_size.x)
 	{
-		m_sprites_snake.begin()->get()->setPosition({ 0.0f,get_position_y()});
+		m_sprites_snake.begin()->get()->setPosition({ 0.0f,get_position_y() });
 		m_x = 0.0f;
 	}
 	else if (m_sprites_snake.begin()->get()->getPosition().x < 0.0f)
 	{
 		m_sprites_snake.begin()->get()->setPosition(new_position_left);
 		m_x = windows_size.x;
-		
+
 	}
 	else if (m_sprites_snake.begin()->get()->getPosition().y < 0.0f)
 	{
@@ -152,12 +181,12 @@ float Player::get_position_y()
 	return m_y;
 }
 
-void Player::check_collision_aabb(Objet& apple, sf::RenderWindow& window)
+void Player::check_collision_with_apple(Objet& apple, sf::RenderWindow& window)
 {
 
 	sf::FloatRect bounding_box_snake = m_sprites_snake.begin()->get()->getGlobalBounds();
-	sf::FloatRect boundingBox_box_apple = apple.get_sprite()->getGlobalBounds();
-	
+	sf::FloatRect boundingBox_box_apple = apple.get_apple_sprite()->getGlobalBounds();
+
 
 	if (bounding_box_snake.findIntersection(boundingBox_box_apple))
 	{
