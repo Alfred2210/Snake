@@ -17,9 +17,13 @@ public:
 	float get_position_x();
 	float get_position_y();
 	void check_collision_with_apple(Objet & apple, sf::RenderWindow& window);
+	void change_texture(const std::filesystem::path& filename, int index);
 private:
 	std::list< std::unique_ptr<sf::Sprite>> m_sprites_snake;
 	std::vector<std::unique_ptr<sf::Texture>> m_snake_textures;
+
+	std::vector<std::unique_ptr<sf::Texture>> m_snake_textures_change;
+
 
 	bool m_is_moving;
 	float m_x, m_y, m_vx, m_vy;

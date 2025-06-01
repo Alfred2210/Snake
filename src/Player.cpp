@@ -9,7 +9,12 @@ Player::Player()
 	add_texture_to_snake("../../../../assets/head_left.png", 0);
 	add_texture_to_snake("../../../../assets/tail_right.png", 1);
 	//add_texture_to_snake("../../../../assets/body_horizontal.png", 2);
-
+	change_texture("../../../../assets/head_right.png", 0);
+	change_texture("../../../../assets/head_down.png", 1);
+	change_texture("../../../../assets/head_up.png", 2);
+	change_texture("../../../../assets/tail_left.png", 3);
+	change_texture("../../../../assets/tail_down.png", 4);
+	change_texture("../../../../assets/tail_up.png", 5);
 
 }
 
@@ -23,7 +28,7 @@ void Player::add_texture_to_snake(const std::filesystem::path& filename, int ind
 
 	if (!m_snake_textures.back()->loadFromFile(filename))
 	{
-		
+
 		m_snake_textures.pop_back();
 		throw std::runtime_error("Failed to load texture from file: ");
 	}
@@ -32,6 +37,18 @@ void Player::add_texture_to_snake(const std::filesystem::path& filename, int ind
 
 }
 
+void Player::change_texture(const std::filesystem::path& filename, int index)
+{
+	m_snake_textures_change.push_back((std::make_unique<sf::Texture>()));
+
+	if (!m_snake_textures_change.back()->loadFromFile(filename))
+	{
+
+		m_snake_textures_change.pop_back();
+		throw std::runtime_error("Failed to load texture from file: ");
+	}
+
+}
 void Player::render_player(sf::RenderWindow& window)
 {
 	for (auto& sprite : m_sprites_snake)
@@ -49,14 +66,14 @@ void Player::center_player_on_screen(sf::RenderWindow& window)
 
 	float sprite_width = m_sprites_snake.front()->getLocalBounds().size.x;
 	float sprite_height = m_sprites_snake.front()->getLocalBounds().size.y;
-	
+
 	float temp_x = x;
 	float temp_y = y;
 
 	for (auto& sprite : m_sprites_snake)
 	{
 		sprite->setPosition(sf::Vector2f(temp_x, temp_y));
-		temp_x += sprite_width; 
+		temp_x += sprite_width;
 	}
 	m_x = x;
 	m_y = y;
@@ -99,35 +116,56 @@ void Player::handle_user_input()
 void Player::update_snake_movement(float& deltatime)
 {
 	handle_user_input();
-
-	float newposition_x = m_x + m_vx * deltatime; 
+	float newposition_x = m_x + m_vx * deltatime;
 	float newposition_y = m_y + m_vy * deltatime;
 
 	auto temp = m_sprites_snake.front()->getPosition();
 	m_sprites_snake.front()->setPosition({ newposition_x, newposition_y });
-	
+
 	float sprite_width = m_sprites_snake.front()->getLocalBounds().size.x;
 	float sprite_height = m_sprites_snake.front()->getLocalBounds().size.y;
 
+	
 
-	for (auto it = std::next(m_sprites_snake.begin()); it!=m_sprites_snake.end();it++)
+	for (auto it = std::next(m_sprites_snake.begin()); it != m_sprites_snake.end(); it++)
 	{
 		auto current_pos = (*it)->getPosition();
 		if (m_vx > 0)
+		{
+			m_sprites_snake.front()->setTexture(*m_snake_textures_change[0]);
+			m_sprites_snake.back()->setTexture(*m_snake_textures_change[3]);
+		
 			(*it)->setPosition(sf::Vector2f(temp.x - sprite_width, temp.y));
-		else if(m_vx<0)
+		}
+		else if (m_vx < 0)
+		{
+			m_sprites_snake.front()->setTexture(*m_snake_textures[0]);
+			m_sprites_snake.back()->setTexture(*m_snake_textures[1]);
 			(*it)->setPosition(sf::Vector2f(temp.x + sprite_width, temp.y));
+		}
 		else if (m_vy > 0)
-			(*it)->setPosition(sf::Vector2f(temp.x , temp.y - sprite_height));
+		{
+			m_sprites_snake.front()->setTexture(*m_snake_textures_change[1]);
+			m_sprites_snake.back()->setTexture(*m_snake_textures_change[5]);
+			(*it)->setPosition(sf::Vector2f(temp.x, temp.y - sprite_width));
+		}
 		else if (m_vy < 0)
-			(*it)->setPosition(sf::Vector2f(temp.x , temp.y + sprite_height));
+		{
+			m_sprites_snake.front()->setTexture(*m_snake_textures_change[2]);
+			m_sprites_snake.back()->setTexture(*m_snake_textures_change[4]);
+			(*it)->setPosition(sf::Vector2f(temp.x, temp.y + sprite_width));
+		}
 
 		temp = current_pos;
 	}
 
 	m_x = newposition_x;
 	m_y = newposition_y;
+
+	std::cout << "Position x : " << m_sprites_snake.front()->getPosition().x << " " << "Position y : " << m_sprites_snake.front()->getPosition().y << std::endl;
+
 }
+
 
 void Player::set_speed(float vx, float vy)
 {
@@ -194,5 +232,6 @@ void Player::check_collision_with_apple(Objet& apple, sf::RenderWindow& window)
 	}
 
 }
+
 
 
