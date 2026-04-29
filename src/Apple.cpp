@@ -9,7 +9,7 @@ Objet::Objet()
 
     m_apple_texture = std::make_unique<sf::Texture>();
    
-    if (!m_apple_texture->loadFromFile("../../../../assets/apple.png"))
+    if (!m_apple_texture->loadFromFile("../assets/apple.png"))
     {
         throw std::runtime_error("Failed to load texture from file:");
     }

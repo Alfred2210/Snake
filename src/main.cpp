@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Player.h"
-#include "Objet.h"
+#include "Apple.h"
 #include <optional>
 
 int main()
@@ -29,8 +29,9 @@ int main()
         window.clear();
         snake.render_player(window);
         apple.draw(window);
-        //apple.bound_red(window);
+        apple.bound_red(window);
         snake.check_collision_with_apple(apple,window);
         window.display();
+        
     }
 }
