@@ -1,159 +1,157 @@
 #include "Player.h"
-
+#include <iostream>
+#include "TextureID.h"
 
 
 Player::Player()
+	: m_positions({ { 400.0f, 200.0f } }),
+	m_direction(Direction::LEFT),
+	m_headSprite(std::nullopt)
 {
-
 
 }
 
-Player::~Player()
+void Player::draw(sf::RenderWindow& window)
 {
-}
 
-
-
-void Player::render(sf::RenderWindow& window)
-{
-	for (auto& sprite : m_sprites)
+	if (m_headSprite.has_value())
 	{
-		window.draw(sprite);
+		window.draw(*m_headSprite);
 	}
 }
 
-void Player::center_player_on_screen(sf::RenderWindow& window)
+void Player::update()
 {
-	sf::Vector2u windows_size = window.getSize();
-	float x = (windows_size.x - m_sprites_snake.begin()->get()->getLocalBounds().size.x) / 2.0f;
-	float y = (windows_size.y - m_sprites_snake.begin()->get()->getLocalBounds().size.y) / 2.0f;
-	
-	m_sprites_snake.begin()->get()->setPosition(sf::Vector2f(x, y));
-
-	float sprite_width = m_sprites_snake.front()->getLocalBounds().size.x;
-	float sprite_height = m_sprites_snake.front()->getLocalBounds().size.y;
-
-	float temp_x = x;
-	float temp_y = y;
-
-	for (auto& sprite : m_sprites_snake)
+	move();
+	if (m_headSprite.has_value())
 	{
-		sprite->setPosition(sf::Vector2f(temp_x, temp_y));
-		temp_x += sprite_width;
-	}
-	m_x = x;
-	m_y = y;
-
-
-}
-
-void Player::handle()
-{
-	bool ismoving = false;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-	{
-		setVelocity(-300.0f, 0.0f);
-		//ismoving = true;
-	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-	{
-		set_speed(300.0, 0.0f);
-		//ismoving = true;
-	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
-	{
-		set_speed(0.0f, -300.0f);
-		//ismoving = true;
-
-	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
-	{
-		set_speed(0.0f, 300.0f);
-		//ismoving = true;
-	}
-
-	if (ismoving)
-	{
-		m_vx = 0.0f;
-		m_vy = 0.0f;
+		std::cout << "Head position: (" << m_positions.front().x << ", " << m_positions.front().y << ")" << std::endl;
+		m_headSprite->setPosition(m_positions.front());
 	}
 
 
 }
 
-void Player::update(float dt)
+void Player::move()
 {
-	handle();
-	m_x +=  m_vx * deltaTime;
-	m_y += m_vy * deltaTime;
+	if (m_positions.empty())
+		return;
 
-}
-
-void Player::setVelocity(const sf::Vector2f& v)
-{
-
-}
-
-sf::Vector2f Player::getPositions() const
-{
-	return sf::Vector2f();
-}
-
-
-void setVelocity(const sf::Vector2f& v) 
-{
-
-}
-
-void Player::wrap_around_screen(sf::RenderWindow& window)
-{
-
-	sf::Vector2u windows_size = window.getSize();
-	sf::Vector2f new_position_left(window.getSize().x, 0.0f);
-	sf::Vector2f new_position_top(window.getSize().y, 0.0f);
-
-
-	if (m_sprites_snake.begin()->get()->getPosition().x > windows_size.x)
+	auto head = m_positions.front();
+	auto newHead = head;
+	float speed = 32.0f;
+	switch (m_direction)
 	{
-		m_sprites_snake.begin()->get()->setPosition({ 0.0f,get_position_y() });
-		m_x = 0.0f;
-	}
-	else if (m_sprites_snake.begin()->get()->getPosition().x < 0.0f)
-	{
-		m_sprites_snake.begin()->get()->setPosition(new_position_left);
-		m_x = windows_size.x;
-
-	}
-	else if (m_sprites_snake.begin()->get()->getPosition().y < 0.0f)
-	{
-		m_sprites_snake.begin()->get()->setPosition(new_position_top);
-		m_y = windows_size.y;
-
-	}
-	else if (m_sprites_snake.begin()->get()->getPosition().y > windows_size.y)
-	{
-		m_sprites_snake.begin()->get()->setPosition({ get_position_x(), 0.0f });
-		m_y = 0.0f;
-
+	case Direction::UP:
+		newHead = { newHead.x, newHead.y - speed };
+		break;
+	case Direction::DOWN:
+		newHead = { newHead.x, newHead.y + speed };
+		break;
+	case Direction::RIGHT:
+		newHead = { newHead.x + speed , newHead.y };
+		break;
+	case Direction::LEFT:
+		newHead = { newHead.x - speed, newHead.y };
+		break;
+	default:
+		break;
 	}
 
 
+	m_positions.push_front(newHead);
+	m_positions.pop_back();
 }
 
-
-void Player::check_collision_with_apple(Objet& apple, sf::RenderWindow& window)
+void Player::setDirection(Direction direction)
 {
-
-	sf::FloatRect bounding_box_snake = m_sprites_snake.begin()->get()->getGlobalBounds();
-	sf::FloatRect boundingBox_box_apple = apple.get_apple_sprite()->getGlobalBounds();
-
-
-	if (bounding_box_snake.findIntersection(boundingBox_box_apple))
+	if ((direction == Direction::UP && m_direction == Direction::DOWN) || (direction == Direction::DOWN && m_direction == Direction::UP) ||
+		(direction == Direction::LEFT && m_direction == Direction::RIGHT) || (direction == Direction::RIGHT && m_direction == Direction::LEFT) || direction == Direction::NONE)
 	{
-		apple.generate_random_position(window);
+		return;
 	}
 
+	m_direction = direction;
+}
+
+void Player::setPosition(sf::Vector2f position)
+{
+	m_positions.front() = position;
 }
 
 
+sf::Vector2f Player::getPosition() const
+{
+	return m_positions.front();
+}
+
+void Player::setTexture(const sf::Texture& texture)
+{
+
+	m_headSprite.emplace(texture);
+
+}
+
+void Player::updateSprite(const ResourceManager& resourceManager)
+{
+	// si le sprite de la tête n'existe pas, on ne fait rien
+
+	if (!m_headSprite.has_value())
+		return;
+
+	switch (m_direction)
+	{
+	case Direction::UP:
+		m_headSprite->setTexture(resourceManager.getTexture(TextureID::HEAD_UP));
+		break;
+	case Direction::DOWN:
+		m_headSprite->setTexture(resourceManager.getTexture(TextureID::HEAD_DOWN));
+		break;
+	case Direction::RIGHT:
+		m_headSprite->setTexture(resourceManager.getTexture(TextureID::HEAD_RIGHT));
+		break;
+	case Direction::LEFT:
+		m_headSprite->setTexture(resourceManager.getTexture(TextureID::HEAD_LEFT));
+		break;
+	default:
+		break;
+	}
+
+
+}
+
+void Player::updateTailSprite(const ResourceManager& resourceManager)
+{
+	if(!m_tailSprite.has_value())
+		return;
+
+	if (m_positions.size() < 2)
+		return;
+
+	auto tail = m_positions.back();
+
+	auto beforeTail = m_positions[m_positions.size() - 2];
+
+	if (beforeTail.x < tail.x)
+	{
+		m_tailSprite->setTexture(resourceManager.getTexture(TextureID::TAIL_RIGHT));
+
+	}
+	else if (beforeTail.x > tail.x)
+	{
+		m_tailSprite->setTexture(resourceManager.getTexture(TextureID::TAIL_LEFT));
+	}
+	else if (beforeTail.y < tail.y)
+	{
+		m_tailSprite->setTexture(resourceManager.getTexture(TextureID::TAIL_DOWN));
+	}
+	else if (beforeTail.y > tail.y)
+	{
+		m_tailSprite->setTexture(resourceManager.getTexture(TextureID::TAIL_UP));
+
+	}
+
+	m_tailSprite->setPosition(tail);
+
+}
 

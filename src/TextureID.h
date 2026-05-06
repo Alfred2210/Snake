@@ -1,0 +1,26 @@
+#pragma once
+
+
+enum class TextureID
+{
+    HEAD_UP,
+    HEAD_DOWN,
+    HEAD_LEFT,
+    HEAD_RIGHT,
+
+    BODY_HORIZONTAL,
+    BODY_VERTICAL,
+    BODY_TOPLEFT,
+    BODY_TOPRIGHT,
+    BODY_BOTTOMLEFT,
+    BODY_BOTTOMRIGHT,
+
+    TAIL_UP,
+    TAIL_DOWN,
+    TAIL_LEFT,
+    TAIL_RIGHT,
+
+    APPLE,
+
+    COUNT
+};
