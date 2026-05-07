@@ -3,21 +3,30 @@
 #include "TextureID.h"
 
 
-Player::Player()
-	: m_positions({ { 400.0f, 200.0f } }),
+Player::Player(const sf::Vector2u& worldSize)
+	: 
 	m_direction(Direction::LEFT),
-	m_headSprite(std::nullopt)
+	m_headSprite(std::nullopt),
+	m_tailSprite(std::nullopt),
+	m_shouldGrow(false)
 {
-
+	float startX = (worldSize.x / 32 / 2) * 32.0f;
+	float startY = (worldSize.y / 32 / 2) * 32.0f;
+	m_positions = { { startX, startY }, { startX +32.0f, startY } };
 }
 
 void Player::draw(sf::RenderWindow& window)
 {
-
 	if (m_headSprite.has_value())
 	{
 		window.draw(*m_headSprite);
 	}
+
+	if (m_tailSprite.has_value())
+	{
+		window.draw(*m_tailSprite);
+	}
+
 }
 
 void Player::update()
@@ -25,10 +34,14 @@ void Player::update()
 	move();
 	if (m_headSprite.has_value())
 	{
-		std::cout << "Head position: (" << m_positions.front().x << ", " << m_positions.front().y << ")" << std::endl;
 		m_headSprite->setPosition(m_positions.front());
 	}
 
+	if (m_tailSprite.has_value())
+	{
+
+		m_tailSprite->setPosition(m_positions.back());
+	}
 
 }
 
@@ -60,8 +73,20 @@ void Player::move()
 
 
 	m_positions.push_front(newHead);
-	m_positions.pop_back();
+	if(m_shouldGrow)
+	{
+		m_shouldGrow = false;
+	}
+	else
+		m_positions.pop_back();
 }
+
+void Player::grow()
+{
+
+	m_shouldGrow = true;
+}
+
 
 void Player::setDirection(Direction direction)
 {
@@ -80,17 +105,25 @@ void Player::setPosition(sf::Vector2f position)
 }
 
 
+
 sf::Vector2f Player::getPosition() const
 {
 	return m_positions.front();
 }
 
-void Player::setTexture(const sf::Texture& texture)
+void Player::setHeadTexture(const sf::Texture& texture)
 {
 
 	m_headSprite.emplace(texture);
 
 }
+
+void Player::setTailTexture(const sf::Texture& texture)
+{
+
+	m_tailSprite.emplace(texture);
+}
+
 
 void Player::updateSprite(const ResourceManager& resourceManager)
 {
@@ -98,6 +131,8 @@ void Player::updateSprite(const ResourceManager& resourceManager)
 
 	if (!m_headSprite.has_value())
 		return;
+
+
 
 	switch (m_direction)
 	{
@@ -122,16 +157,14 @@ void Player::updateSprite(const ResourceManager& resourceManager)
 
 void Player::updateTailSprite(const ResourceManager& resourceManager)
 {
-	if(!m_tailSprite.has_value())
-		return;
 
-	if (m_positions.size() < 2)
-		return;
+	if (m_positions.size() < 2 || !m_tailSprite.has_value()) return;
 
 	auto tail = m_positions.back();
 
 	auto beforeTail = m_positions[m_positions.size() - 2];
 
+	
 	if (beforeTail.x < tail.x)
 	{
 		m_tailSprite->setTexture(resourceManager.getTexture(TextureID::TAIL_RIGHT));
@@ -151,7 +184,18 @@ void Player::updateTailSprite(const ResourceManager& resourceManager)
 
 	}
 
-	m_tailSprite->setPosition(tail);
 
+}
+
+bool Player::checkSelfCollision() const
+{
+	auto head = m_positions.front();
+	for (size_t i = 1; i < m_positions.size(); i++)
+	{
+		if (head == m_positions[i] )
+			return true;
+	}
+
+	return false;
 }
 

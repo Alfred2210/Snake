@@ -11,16 +11,18 @@
 class Player
 {
 public:
-	Player();
+	Player(const sf::Vector2u& worldSize);
 	void draw(sf::RenderWindow &windows);
 	void update();
 	void move();
+	void grow();
 	void setDirection(Direction direction);
 	void setPosition(sf::Vector2f position);
-	void setTailPosition(sf::Vector2f position);
-	void setTexture(const sf::Texture& texture);
+	void setHeadTexture(const sf::Texture& texture);
+	void setTailTexture(const sf::Texture& texture);
 	void updateSprite(const ResourceManager& resourceManager);
 	void updateTailSprite(const ResourceManager& resourceManager);
+	bool checkSelfCollision() const;
 	sf::Vector2f getPosition() const;
 
 
@@ -29,5 +31,5 @@ private:
 	Direction m_direction;
 	std::optional<sf::Sprite> m_headSprite;
 	std::optional<sf::Sprite> m_tailSprite;
-	
+	bool m_shouldGrow;
 };

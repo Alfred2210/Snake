@@ -14,14 +14,19 @@ public:
 	void update(float dt);
 	void render(sf::RenderWindow& window);
 	bool checkWallCollision();
+	bool checkAppleCollision();
+	void checkCollision();
+
+
+
 private:
-	ResourceManager m_resourceManager;
-	Input m_input;
-	Apple m_apple;
-	Player m_snake;
-	float m_timeSinceLastUpdate = 0.0f;
-	float m_updateInterval = 0.2f;
-	sf::Vector2u m_worldSize;
-	bool m_isGameOver = false;
+    ResourceManager m_resourceManager;
+    Input m_input;
+    sf::Vector2u m_worldSize;
+    Apple m_apple;
+    Player m_snake;
+    float m_timeSinceLastUpdate = 0.0f;
+    float m_updateInterval = 0.2f;
+    bool m_isGameOver = false;
 };
 
